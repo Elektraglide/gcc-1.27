@@ -104,6 +104,9 @@ software.
  You are forbidden to forbid anyone else to use, share and improve
  what you give them.   Help stamp out software-hoarding!  */
 
+/* Uniflex uses CR as line ending */
+#define NEWLINE '\015'
+
 typedef unsigned char U_CHAR;
 
 #ifdef EMACS
@@ -158,6 +161,13 @@ typedef unsigned char U_CHAR;
 #endif /* VMS */
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
+
+/* In case config.h defines these.  */
+#undef bcopy
+#undef bzero
+#undef bcmp
+
+#define GPLUSPLUS_INCLUDE_DIR "/usr/local/lib/g++-include"
 
 /* External declarations.  */
 
@@ -315,7 +325,7 @@ struct directory_stack include_defaults[] =
   {
 #ifndef VMS
     { &include_defaults[1], GCC_INCLUDE_DIR },
-    { 0, "/usr/include" }
+    { 0, "/lib/include" }
 #else
     { &include_defaults[1], "GNU_CC_INCLUDE:" },       /* GNU includes */
     { &include_defaults[2], "SYS$SYSROOT:[SYSLIB.]" }, /* VAX-11 "C" includes */
@@ -627,7 +637,7 @@ main (argc, argv)
   for (i = 1; i < argc; i++) {
     if (argv[i][0] != '-') {
       if (out_fname != NULL)
-	fatal ("Usage: %s [switches] input output\n", argv[0]);
+	fatal ("Usage: %s [switches] input output\015", argv[0]);
       else if (in_fname != NULL) {
 	out_fname = argv[i];
 	if (! freopen (out_fname, "w", stdout))
@@ -646,7 +656,7 @@ main (argc, argv)
 
       case 'o':
 	if (out_fname != NULL)
-	  fatal ("Output filename specified twice\n");
+	  fatal ("Output filename specified twice\015");
 	out_fname = argv[++i];
 	if (! freopen (out_fname, "w", stdout))
 	  pfatal_with_name (out_fname);
@@ -700,7 +710,7 @@ main (argc, argv)
 	break;
 
       case 'v':
-	fprintf (stderr, "GNU CPP version %s\n", version_string);
+	fprintf (stderr, "GNU CPP version %s\015", version_string);
 	break;
 
       case 'D':
@@ -793,7 +803,7 @@ main (argc, argv)
 	}	/* else fall through into error */
 
       default:
-	fatal ("Invalid option `%s'\n", argv[i]);
+	fatal ("Invalid option `%s'\015", argv[i]);
       }
     }
   }
@@ -966,8 +976,8 @@ main (argc, argv)
 
   /* Make sure data ends with a newline.  And put a null after it.  */
 
-  if (fp->length > 0 && fp->buf[fp->length-1] != '\n')
-    fp->buf[fp->length++] = '\n';
+  if (fp->length > 0 && fp->buf[fp->length-1] != NEWLINE)
+    fp->buf[fp->length++] = NEWLINE;
   fp->buf[fp->length] = '\0';
 
   output_line_command (fp, &outbuf, 0);
@@ -1084,7 +1094,7 @@ newline_fix (bp)
 
   /* First count the backslash-newline pairs here.  */
 
-  while (*p++ == '\\' && *p++ == '\n')
+  while (*p++ == '\\' && *p++ == NEWLINE)
     count++;
 
   p = bp + count * 2;
@@ -1104,7 +1114,7 @@ newline_fix (bp)
   /* Now write the same number of pairs after the embarrassing chars.  */
   while (count-- > 0) {
     *bp++ = '\\';
-    *bp++ = '\n';
+    *bp++ = NEWLINE;
   }
 }
 
@@ -1119,7 +1129,7 @@ name_newline_fix (bp)
 
   /* First count the backslash-newline pairs here.  */
 
-  while (*p++ == '\\' && *p++ == '\n')
+  while (*p++ == '\\' && *p++ == NEWLINE)
     count++;
 
   p = bp + count * 2;
@@ -1139,7 +1149,7 @@ name_newline_fix (bp)
   /* Now write the same number of pairs after the embarrassing chars.  */
   while (count-- > 0) {
     *bp++ = '\\';
-    *bp++ = '\n';
+    *bp++ = NEWLINE;
   }
 }
 
@@ -1262,7 +1272,7 @@ do { ip = &instack[indepth];		\
     case '\\':
       if (ibp >= limit)
 	break;
-      if (*ibp == '\n') {
+      if (*ibp == NEWLINE) {
 	/* Always merge lines ending with backslash-newline,
 	   even in middle of identifier.  */
 	++ibp;
@@ -1299,7 +1309,7 @@ do { ip = &instack[indepth];		\
 	while (1) {
 	  if (is_hor_space[*bp])
 	    bp++;
-	  else if (*bp == '\\' && bp[1] == '\n')
+	  else if (*bp == '\\' && bp[1] == NEWLINE)
 	    bp += 2;
 	  else if (*bp == '/' && bp[1] == '*') {
 	    bp += 2;
@@ -1309,7 +1319,7 @@ do { ip = &instack[indepth];		\
 	  }
 	  else if (cplusplus && *bp == '/' && bp[1] == '/') {
 	    bp += 2;
-	    while (*bp++ != '\n') ;
+	    while (*bp++ != NEWLINE) ;
 	  }
 	  else break;
 	}
@@ -1376,7 +1386,7 @@ do { ip = &instack[indepth];		\
 	  }
 	*obp++ = *ibp;
 	switch (*ibp++) {
-	case '\n':
+	case NEWLINE:
 	  ++ip->lineno;
 	  ++op->lineno;
 	  if (traditional)
@@ -1391,7 +1401,7 @@ do { ip = &instack[indepth];		\
 	case '\\':
 	  if (ibp >= limit)
 	    break;
-	  if (*ibp == '\n')
+	  if (*ibp == NEWLINE)
 	    {
 	      /* Backslash newline is replaced by nothing at all,
 		 but keep the line counts correct.  */
@@ -1402,7 +1412,7 @@ do { ip = &instack[indepth];		\
 	  else {
 	    /* ANSI stupidly requires that in \\ the second \
 	       is *not* prevented from combining with a newline.  */
-	    while (*ibp == '\\' && ibp[1] == '\n') {
+	    while (*ibp == '\\' && ibp[1] == NEWLINE) {
 	      ibp += 2;
 	      ++ip->lineno;
 	    }
@@ -1421,7 +1431,7 @@ do { ip = &instack[indepth];		\
       break;
 
     case '/':
-      if (*ibp == '\\' && ibp[1] == '\n')
+      if (*ibp == '\\' && ibp[1] == NEWLINE)
 	newline_fix (ibp);
       if (cplusplus && *ibp == '/')
 	{
@@ -1443,7 +1453,7 @@ do { ip = &instack[indepth];		\
 	    U_CHAR *before_bp = ibp+2;
 
 	    while (ibp < limit) {
-	      if (*ibp++ == '\n') {
+	      if (*ibp++ == NEWLINE) {
 		ibp--;
 		if (put_out_comments) {
 		  bcopy (before_bp, obp, ibp - before_bp);
@@ -1491,18 +1501,18 @@ do { ip = &instack[indepth];		\
 	      warning("`/*' within comment");
 	    break;
 	  case '*':
-	    if (*ibp == '\\' && ibp[1] == '\n')
+	    if (*ibp == '\\' && ibp[1] == NEWLINE)
 	      newline_fix (ibp);
 	    if (ibp >= limit || *ibp == '/')
 	      goto comment_end;
 	    break;
-	  case '\n':
+	  case NEWLINE:
 	    ++ip->lineno;
 	    /* Copy the newline into the output buffer, in order to
 	       avoid the pain of a #line every time a multiline comment
 	       is seen.  */
 	    if (!put_out_comments)
-	      *obp++ = '\n';
+	      *obp++ = NEWLINE;
 	    ++op->lineno;
 	  }
 	}
@@ -1570,7 +1580,7 @@ do { ip = &instack[indepth];		\
       hash = HASHSTEP (hash, c);
       break;
 
-    case '\n':
+    case NEWLINE:
       /* If reprocessing a macro expansion, newline is a special marker.  */
       if (ip->macro != 0) {
 	/* Newline White is a "funny space" to separate tokens that are
@@ -1604,7 +1614,7 @@ do { ip = &instack[indepth];		\
 	  if (!output_marks) {
 	    obp[-1] = *ibp++;
 	    /* And Newline Newline makes a newline, so count it.  */
-	    if (obp[-1] == '\n')
+	    if (obp[-1] == NEWLINE)
 	      op->lineno++;
 	  } else {
 	    /* If expanding a macro arg, keep the newline space.
@@ -1751,7 +1761,7 @@ randomchar:
 
 		if (output_marks) {
 		  check_expand (op, limit - ibp + 2);
-		  *obp++ = '\n';
+		  *obp++ = NEWLINE;
 		  *obp++ = '-';
 		}
 		break;
@@ -1772,7 +1782,7 @@ randomchar:
 		  }
 		  else if (is_space[*ibp]) {
 		    *obp++ = *ibp++;
-		    if (ibp[-1] == '\n')
+		    if (ibp[-1] == NEWLINE)
 		      {
 			if (ip->macro == 0) {
 			  /* Newline in a file.  Count it.  */
@@ -1787,7 +1797,7 @@ randomchar:
 			  if (*ibp == '-')
 			    ibp++;
 			  else {
-			    if (*ibp == '\n')
+			    if (*ibp == NEWLINE)
 			      ++op->lineno;
 			    *obp++ = *ibp++;
 			  }
@@ -1964,7 +1974,7 @@ handle_directive (ip, op)
   while (1) {
     if (is_hor_space[*bp])
       bp++;
-    else if (*bp == '\\' && bp[1] == '\n') {
+    else if (*bp == '\\' && bp[1] == NEWLINE) {
       bp += 2; ip->lineno++;
     } else break;
   }
@@ -1978,7 +1988,7 @@ handle_directive (ip, op)
     if (is_idchar[*cp])
       cp++;
     else {
-      if (*cp == '\\' && cp[1] == '\n')
+      if (*cp == '\\' && cp[1] == NEWLINE)
 	name_newline_fix (cp);
       if (is_idchar[*cp])
 	cp++;
@@ -2014,7 +2024,7 @@ handle_directive (ip, op)
 	switch (c) {
 	case '\\':
 	  if (bp < limit) {
-	    if (*bp == '\n')
+	    if (*bp == NEWLINE)
 	      {
 		ip->lineno++;
 		copy_command = 1;
@@ -2049,7 +2059,7 @@ handle_directive (ip, op)
 	  break;
 
 	case '/':
-	  if (*bp == '\\' && bp[1] == '\n')
+	  if (*bp == '\\' && bp[1] == NEWLINE)
 	    newline_fix (bp);
 	  if (*bp == '*'
 	      || (cplusplus && *bp == '/')) {
@@ -2059,7 +2069,7 @@ handle_directive (ip, op)
 	    bp = ip->bufp;
 	    /* No need to copy the command because of a comment at the end;
 	       just don't include the comment in the directive.  */
-	    if (bp == limit || *bp == '\n') {
+	    if (bp == limit || *bp == NEWLINE) {
 	      bp = obp;
 	      goto endloop1;
 	    }
@@ -2069,7 +2079,7 @@ handle_directive (ip, op)
 	  }
 	  break;
 
-	case '\n':
+	case NEWLINE:
 	  --bp;		/* Point to the newline */
 	  ip->bufp = bp;
 	  goto endloop1;
@@ -2099,7 +2109,7 @@ handle_directive (ip, op)
 	  *cp++ = c;
 
 	  switch (c) {
-	  case '\n':
+	  case NEWLINE:
 	    break;
 
 	    /* <...> is special for #include.  */
@@ -2113,7 +2123,7 @@ handle_directive (ip, op)
 	    break;
 
 	  case '\\':
-	    if (*xp == '\n') {
+	    if (*xp == NEWLINE) {
 	      xp++;
 	      cp--;
 	      if (cp != buf && is_space[cp[-1]]) {
@@ -2497,8 +2507,8 @@ finclude (f, fname, op)
   if (!no_trigraphs)
     trigraph_pcp (fp);
 
-  if (fp->length > 0 && fp->buf[fp->length-1] != '\n')
-    fp->buf[fp->length++] = '\n';
+  if (fp->length > 0 && fp->buf[fp->length-1] != NEWLINE)
+    fp->buf[fp->length++] = NEWLINE;
   fp->buf[fp->length] = '\0';
 
   success = 1;
@@ -2815,7 +2825,7 @@ collect_expansion (buf, end, nargs, arglist)
 
   /* Convert leading whitespace to Newline-markers.  */
   while (p < limit && is_space[*p]) {
-    *exp_p++ = '\n';
+    *exp_p++ = NEWLINE;
     *exp_p++ = *p++;
   }
 
@@ -2869,7 +2879,7 @@ collect_expansion (buf, end, nargs, arglist)
 	  exp_p--;
 	  SKIP_WHITE_SPACE (p);
 	  if (p == limit || ! is_idstart[*p] || nargs <= 0)
-	    error ("# operator should be followed by a macro argument name\n");
+	    error ("# operator should be followed by a macro argument name\015");
 	  else
 	    stringify = p;
 	}
@@ -2969,7 +2979,7 @@ collect_expansion (buf, end, nargs, arglist)
 	while (p != lim1)
 	  *exp_p++ = *p++;
 	if (stringify == id_beg)
-	  error ("# operator should be followed by a macro argument name\n");
+	  error ("# operator should be followed by a macro argument name\015");
       }
     }
   }
@@ -2977,12 +2987,12 @@ collect_expansion (buf, end, nargs, arglist)
   if (limit < end) {
     /* Convert trailing whitespace to Newline-markers.  */
     while (limit < end && is_space[*limit]) {
-      *exp_p++ = '\n';
+      *exp_p++ = NEWLINE;
       *exp_p++ = *limit++;
     }
   } else if (!traditional) {
     /* There is no trailing whitespace, so invent some.  */
-    *exp_p++ = '\n';
+    *exp_p++ = NEWLINE;
     *exp_p++ = ' ';
   }
 
@@ -3236,7 +3246,7 @@ do_elif (buf, limit, op, keyword)
       if (if_stack->fname != NULL && ip->fname != NULL &&
 	  strcmp (if_stack->fname, ip->fname) != 0)
 	fprintf (stderr, ", file %s", if_stack->fname);
-      fprintf (stderr, ")\n");
+      fprintf (stderr, ")\015");
     }
     if_stack->type = T_ELIF;
   }
@@ -3367,7 +3377,7 @@ skip_if_group (ip, any)
   while (bp < endb) {
     switch (*bp++) {
     case '/':			/* possible comment */
-      if (*bp == '\\' && bp[1] == '\n')
+      if (*bp == '\\' && bp[1] == NEWLINE)
 	newline_fix (bp);
       if (*bp == '*'
 	  || (cplusplus && *bp == '/')) {
@@ -3380,7 +3390,7 @@ skip_if_group (ip, any)
       if (!traditional)
 	bp = skip_quoted_string (bp - 1, endb, ip->lineno, &ip->lineno, 0, 0);
       break;
-    case '\n':
+    case NEWLINE:
       ++ip->lineno;
       beg_of_line = bp;
       break;
@@ -3397,7 +3407,7 @@ skip_if_group (ip, any)
       while (1) {
 	if (is_hor_space[*bp])
 	  bp++;
-	else if (*bp == '\\' && bp[1] == '\n')
+	else if (*bp == '\\' && bp[1] == NEWLINE)
 	  bp += 2;
 	else if (*bp == '/' && bp[1] == '*') {
 	  bp += 2;
@@ -3407,7 +3417,7 @@ skip_if_group (ip, any)
 	}
 	else if (cplusplus && *bp == '/' && bp[1] == '/') {
 	  bp += 2;
-	  while (*bp++ != '\n') ;
+	  while (*bp++ != NEWLINE) ;
         }
 	else break;
       }
@@ -3422,7 +3432,7 @@ skip_if_group (ip, any)
       while (1) {
 	if (is_hor_space[*bp])
 	  bp++;
-	else if (*bp == '\\' && bp[1] == '\n')
+	else if (*bp == '\\' && bp[1] == NEWLINE)
 	  bp += 2;
 	else break;
       }
@@ -3437,7 +3447,7 @@ skip_if_group (ip, any)
 	if (is_idchar[*bp])
 	  bp++;
 	else {
-	  if (*bp == '\\' && bp[1] == '\n')
+	  if (*bp == '\\' && bp[1] == NEWLINE)
 	    name_newline_fix (bp);
 	  if (is_idchar[*bp])
 	    bp++;
@@ -3529,7 +3539,7 @@ do_else (buf, limit, op, keyword)
       fprintf (stderr, " (matches line %d", if_stack->lineno);
       if (strcmp (if_stack->fname, ip->fname) != 0)
 	fprintf (stderr, ", file %s", if_stack->fname);
-      fprintf (stderr, ")\n");
+      fprintf (stderr, ")\015");
     }
     if_stack->type = T_ELSE;
   }
@@ -3575,19 +3585,19 @@ validate_else (p)
 {
   /* Advance P over whitespace and comments.  */
   while (1) {
-    if (*p == '\\' && p[1] == '\n')
+    if (*p == '\\' && p[1] == NEWLINE)
       p += 2;
     if (is_hor_space[*p])
       p++;
     else if (*p == '/') {
-      if (p[1] == '\\' && p[2] == '\n')
+      if (p[1] == '\\' && p[2] == NEWLINE)
 	newline_fix (p + 1);
       if (p[1] == '*') {
 	p += 2;
 	/* Don't bother warning about unterminated comments
 	   since that will happen later.  Just be sure to exit.  */
 	while (*p) {
-	  if (p[1] == '\\' && p[2] == '\n')
+	  if (p[1] == '\\' && p[2] == NEWLINE)
 	    newline_fix (p + 1);
 	  if (*p == '*' && p[1] == '/') {
 	    p += 2;
@@ -3598,11 +3608,11 @@ validate_else (p)
       }
       else if (cplusplus && p[1] == '/') {
 	p += 2;
-	while (*p && *p++ != '\n') ;
+	while (*p && *p++ != NEWLINE) ;
       }
     } else break;
   }
-  if (*p && *p != '\n')
+  if (*p && *p != NEWLINE)
     warning ("text following #else or #endif violates ANSI standard");
 }
 
@@ -3634,19 +3644,19 @@ skip_to_end_of_comment (ip, line_counter)
     if (output)
       {
 	while (bp < limit)
-	  if ((*op->bufp++ = *bp++) == '\n')
+	  if ((*op->bufp++ = *bp++) == NEWLINE)
 	    {
 	      bp--;
 	      break;
 	    }
 	op->bufp[-1] = '*';
 	*op->bufp++ = '/';
-	*op->bufp++ = '\n';
+	*op->bufp++ = NEWLINE;
       }
     else
       {
 	while (bp < limit) {
-	  if (*bp++ == '\n')
+	  if (*bp++ == NEWLINE)
 	    {
 	      bp--;
 	      break;
@@ -3660,14 +3670,14 @@ skip_to_end_of_comment (ip, line_counter)
     if (output)
       *op->bufp++ = *bp;
     switch (*bp++) {
-    case '\n':
+    case NEWLINE:
       if (line_counter != NULL)
 	++*line_counter;
       if (output)
 	++op->lineno;
       break;
     case '*':
-      if (*bp == '\\' && bp[1] == '\n')
+      if (*bp == '\\' && bp[1] == NEWLINE)
 	newline_fix (bp);
       if (*bp == '/') {
         if (output)
@@ -3720,20 +3730,20 @@ skip_quoted_string (bp, limit, start_line, count_newlines, backslash_newlines_p,
     }
     c = *bp++;
     if (c == '\\') {
-      while (*bp == '\\' && bp[1] == '\n') {
+      while (*bp == '\\' && bp[1] == NEWLINE) {
 	if (backslash_newlines_p)
 	  *backslash_newlines_p = 1;
 	if (count_newlines)
 	  ++*count_newlines;
 	bp += 2;
       }
-      if (*bp == '\n' && count_newlines) {
+      if (*bp == NEWLINE && count_newlines) {
 	if (backslash_newlines_p)
 	  *backslash_newlines_p = 1;
 	++*count_newlines;
       }
       bp++;
-    } else if (c == '\n') {
+    } else if (c == NEWLINE) {
       if (match == '\'') {
 	error_with_line (line_for_error (start_line),
 			 "unterminated character constant");
@@ -3786,7 +3796,7 @@ output_line_command (ip, op, conditional)
     if (ip->lineno > op->lineno && ip->lineno < op->lineno + 8) {
       check_expand (op, 10);
       while (ip->lineno > op->lineno) {
-	*op->bufp++ = '\n';
+	*op->bufp++ = NEWLINE;
 	op->lineno++;
       }
       return;
@@ -3794,14 +3804,14 @@ output_line_command (ip, op, conditional)
   }
 
 #ifdef OUTPUT_LINE_COMMANDS
-  sprintf (line_cmd_buf, "#line %d \"%s\"\n", ip->lineno, ip->fname);
+  sprintf (line_cmd_buf, "#line %d \"%s\"\015", ip->lineno, ip->fname);
 #else
-  sprintf (line_cmd_buf, "# %d \"%s\"\n", ip->lineno, ip->fname);
+  sprintf (line_cmd_buf, "# %d \"%s\"\015", ip->lineno, ip->fname);
 #endif
   len = strlen (line_cmd_buf);
   check_expand (op, len + 1);
-  if (op->bufp > op->buf && op->bufp[-1] != '\n')
-    *op->bufp++ = '\n';
+  if (op->bufp > op->buf && op->bufp[-1] != NEWLINE)
+    *op->bufp++ = NEWLINE;
   bcopy (line_cmd_buf, op->bufp, len);
   op->bufp += len;
   op->lineno = ip->lineno;
@@ -3955,7 +3965,7 @@ macroexpand (hp, op)
 
 	      /* Special markers Newline Space and Newline Newline
 		 generate nothing for a stringified argument.  */
-	      if (c == '\n') {
+	      if (c == NEWLINE) {
 		i++;
 		continue;
 	      }
@@ -3999,7 +4009,7 @@ macroexpand (hp, op)
 	      /* Delete any no-reexpansion marker that follows
 		 an identifier at the beginning of the argument
 		 if the argument is concatenated with what precedes it.  */
-	      if (p1[0] == '\n' && p1[1] == '-')
+	      if (p1[0] == NEWLINE && p1[1] == '-')
 		p1 += 2;
 	    }
 	    if (ap->raw_after) {
@@ -4011,7 +4021,7 @@ macroexpand (hp, op)
 		  U_CHAR *p2 = l1 - 1;
 		  /* If a `-' is preceded by an odd number of newlines then it
 		     and the last newline are a no-reexpansion marker.  */
-		  while (p2 != p1 && p2[-1] == '\n') p2--;
+		  while (p2 != p1 && p2[-1] == NEWLINE) p2--;
 		  if ((l1 - 1 - p2) & 1) {
 		    l1 -= 2;
 		  }
@@ -4230,16 +4240,16 @@ macarg1 (start, limit, depthptr, newlines, comments)
       if (--(*depthptr) < 0)
 	return bp;
       break;
-    case '\n':
+    case NEWLINE:
       ++*newlines;
       break;
     case '/':
-      if (bp[1] == '\\' && bp[2] == '\n')
+      if (bp[1] == '\\' && bp[2] == NEWLINE)
 	newline_fix (bp + 1);
       if (cplusplus && bp[1] == '/') {
 	*comments = 1;
 	bp += 2;
-	while (bp < limit && *bp++ != '\n') ;
+	while (bp < limit && *bp++ != NEWLINE) ;
 	++*newlines;
 	break;
       }
@@ -4249,11 +4259,11 @@ macarg1 (start, limit, depthptr, newlines, comments)
       bp += 2;
       while (bp + 1 < limit) {
 	if (bp[0] == '*'
-	    && bp[1] == '\\' && bp[2] == '\n')
+	    && bp[1] == '\\' && bp[2] == NEWLINE)
 	  newline_fix (bp + 1);
 	if (bp[0] == '*' && bp[1] == '/')
 	  break;
-	if (*bp == '\n') ++*newlines;
+	if (*bp == NEWLINE) ++*newlines;
 	bp++;
       }
       break;
@@ -4264,12 +4274,12 @@ macarg1 (start, limit, depthptr, newlines, comments)
 	for (quotec = *bp++; bp + 1 < limit && *bp != quotec; bp++) {
 	  if (*bp == '\\') {
 	    bp++;
-	    if (*bp == '\n')
+	    if (*bp == NEWLINE)
 	      ++*newlines;
-	    while (*bp == '\\' && bp[1] == '\n') {
+	    while (*bp == '\\' && bp[1] == NEWLINE) {
 	      bp += 2;
 	    }
-	  } else if (*bp == '\n') {
+	  } else if (*bp == NEWLINE) {
 	    ++*newlines;
 	    if (quotec == '\'')
 	      break;
@@ -4330,19 +4340,19 @@ discard_comments (start, length, newlines)
   while (ibp < limit) {
     *obp++ = c = *ibp++;
     switch (c) {
-    case '\n':
+    case NEWLINE:
       /* Duplicate the newline.  */
-      *obp++ = '\n';
+      *obp++ = NEWLINE;
       break;
 
     case '/':
-      if (*ibp == '\\' && ibp[1] == '\n')
+      if (*ibp == '\\' && ibp[1] == NEWLINE)
 	newline_fix (ibp);
       /* Delete any comment.  */
       if (cplusplus && ibp[0] == '/') {
 	obp--;
 	ibp++;
-	while (ibp < limit && *ibp++ != '\n') ;
+	while (ibp < limit && *ibp++ != NEWLINE) ;
 	break;
       }
       if (ibp[0] != '*' || ibp + 1 >= limit)
@@ -4351,7 +4361,7 @@ discard_comments (start, length, newlines)
       ibp++;
       while (ibp + 1 < limit) {
 	if (ibp[0] == '*'
-	    && ibp[1] == '\\' && ibp[2] == '\n')
+	    && ibp[1] == '\\' && ibp[2] == NEWLINE)
 	  newline_fix (ibp + 1);
 	if (ibp[0] == '*' && ibp[1] == '/')
 	  break;
@@ -4372,10 +4382,10 @@ discard_comments (start, length, newlines)
 	    *obp++ = c = *ibp++;
 	    if (c == quotec)
 	      break;
-	    if (c == '\n' && quotec == '\'')
+	    if (c == NEWLINE && quotec == '\'')
 	      break;
 	    if (c == '\\' && ibp < limit) {
-	      while (*ibp == '\\' && ibp[1] == '\n')
+	      while (*ibp == '\\' && ibp[1] == NEWLINE)
 		ibp += 2;
 	      *obp++ = *ibp++;
 	    }
@@ -4406,7 +4416,7 @@ error (msg, arg1, arg2, arg3)
   if (ip != NULL)
     fprintf (stderr, "%s:%d: ", ip->fname, ip->lineno);
   fprintf (stderr, msg, arg1, arg2, arg3);
-  fprintf (stderr, "\n");
+  fprintf (stderr, "\015");
   errors++;
   return 0;
 }
@@ -4429,7 +4439,7 @@ warning (msg, arg1, arg2, arg3)
     fprintf (stderr, "%s:%d: ", ip->fname, ip->lineno);
   fprintf (stderr, "warning: ");
   fprintf (stderr, msg, arg1, arg2, arg3);
-  fprintf (stderr, "\n");
+  fprintf (stderr, "\015");
   return 0;
 }
 
@@ -4449,7 +4459,7 @@ error_with_line (line, msg, arg1, arg2, arg3)
   if (ip != NULL)
     fprintf (stderr, "%s:%d: ", ip->fname, line);
   fprintf (stderr, msg, arg1, arg2, arg3);
-  fprintf (stderr, "\n");
+  fprintf (stderr, "\015");
   errors++;
   return 0;
 }
@@ -4722,7 +4732,7 @@ dump_all_macros ()
 	  }
 	}
 	dump_defn_1 (defn->expansion, offset, defn->length - offset);
-	printf ("\n");
+	printf ("\015");
       }
     }
   }
@@ -4744,7 +4754,7 @@ dump_defn_1 (base, start, length)
   U_CHAR *limit = base + start + length;
 
   while (p < limit) {
-    if (*p != '\n')
+    if (*p != NEWLINE)
       putchar (*p);
     else if (*p == '\"' || *p =='\'') {
       U_CHAR *p1 = skip_quoted_string (p, limit, 0, 0, 0, 0);
@@ -4810,7 +4820,7 @@ initialize_char_syntax ()
   is_space['\t'] = 1;
   is_space['\v'] = 1;
   is_space['\f'] = 1;
-  is_space['\n'] = 1;
+  is_space[NEWLINE] = 1;
 }
 
 /* Initialize the built-in macros.  */
@@ -4905,7 +4915,7 @@ deps_output (string, size)
 {
   if (size != 0 && deps_column > 50)
     {
-      deps_output ("\\\n  ", 0);
+      deps_output ("\\\015  ", 0);
       deps_column = 0;
     }
 
@@ -5001,7 +5011,7 @@ fatal (str, arg)
 {
   fprintf (stderr, "%s: ", progname);
   fprintf (stderr, str, arg);
-  fprintf (stderr, "\n");
+  fprintf (stderr, "\015");
   exit (FATAL_EXIT_CODE);
 }
 
@@ -5014,9 +5024,9 @@ perror_with_name (name)
 
   fprintf (stderr, "%s: ", progname);
   if (errno < sys_nerr)
-    fprintf (stderr, "%s for `%s'\n", sys_errlist[errno], name);
+    fprintf (stderr, "%s for `%s'\015", sys_errlist[errno], name);
   else
-    fprintf (stderr, "undocumented error for `%s'\n", name);
+    fprintf (stderr, "undocumented error for `%s'\015", name);
 }
 
 void
