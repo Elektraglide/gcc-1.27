@@ -7,3 +7,12 @@ The file INSTALL contains a copy of the installation information.
 
 The GNU C compiler is free software.  See the file COPYING for copying
 permission.
+
+----------
+
+Modified to be compiled for Uniflex 2.2 on Tektronix 4404 68010 system
+Native toolchain dies compiling almost any of these files so using a modern gcc cross m68k toolchain
+elf32touniflex converts .o files to native Uniflex .r files  (see https://github.com/Elektraglide/tek4404)
+Uniflex native toolchain uses + for commandline options and generally no spaces,  eg +o=outputfile  and not -o outputfile so requires changes to gcc
+Uniflex uses \015 as newline; TARGET_NEWLINE is not consistently applied to terminal output
+
