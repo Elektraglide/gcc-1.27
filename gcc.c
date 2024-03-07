@@ -105,6 +105,12 @@ position among the other output files.
 
 */
 
+/* Uniflex uses CR as line ending */
+#define NEWLINE '\015'
+
+#undef DEBUG
+
+
 /* This defines which switches take arguments.  */
 
 #define SWITCH_TAKES_ARG(CHAR)      \
@@ -118,7 +124,7 @@ position among the other output files.
 #include <signal.h>
 #include <sys/file.h>
 #include "config.h"
-#include "obstack.h"
+#include "obstack.h" 
 
 #ifdef USG
 #define R_OK 4
@@ -129,8 +135,12 @@ position among the other output files.
 
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
-extern int xmalloc ();
+extern char * xmalloc ();
 extern void free ();
+
+
+extern 	char *strcat();
+
 
 /* If a stage of compilation returns an exit status >= 1,
    compilation of that file ceases.  */
@@ -215,27 +225,29 @@ struct compiler compilers[] =
 		   %{g} %{O} %{W*} %{w} %{pedantic} %{ansi} %{traditional}\
 		   %{v:-version} %{gg:-symout %g.sym} %{pg:-p} %{p}\
 		   %{S:%{o*}%{!o*:-o %b.s}}%{!S:-o %g.s}\n\
-              %{!S:as %{R} %{j} %{J} %{h} %{d2} %a %{gg:-G %g.sym}\
-                      %g.s %{c:%{o*}%{!o*:-o %w%b.o}}%{!c:-o %d%w%b.o}\n }}}"},
+              %{!S:asm %{R} %{j} %{J} %{h} %{d2} %a %{gg:-G %g.sym}\
+                      %g.s %{c:%{o*}%{!o*:+o=%b.r}}%{!c:+o=%b.r} %W%b.r\n }}}"},
   {".i",
    "cc1 %i %1 %{!Q:-quiet} %{Y*} %{d*} %{m*} %{f*}\
-	%{g} %{O} %{W*} %{w} %{pedantic} %{ansi} %{traditional}\
-	%{v:-version} %{gg:-symout %g.sym} %{pg:-p} %{p}\
-	%{S:%{o*}%{!o*:-o %b.s}}%{!S:-o %g.s}\n\
-    %{!S:as %{R} %{j} %{J} %{h} %{d2} %a %{gg:-G %g.sym}\
-            %g.s %{c:%{o*}%{!o*:-o %w%b.o}}%{!c:-o %d%w%b.o}\n }"},
+ %{g} %{O} %{W*} %{w} %{ansi} %{traditional}\
+ %{v:-version} %{gg:-symout %g.sym} %{pg:-p} %{p}\
+ %{S:%{o*}%{!o*:-o %b.s}}%{!S:-o %g.s}\n\
+    %{!S:asm %{R} %{j} %{J} %{h} %{d2} %a %{gg:-G %g.sym}\
+ %g.s %{c:%{o*}%{!o*:+o=%w%b.r}}%{!c:+o=%d%w%b.r} %W%b.r\n }"},
   {".s",
-   "%{!S:as %{R} %{j} %{J} %{h} %{d2} %a \
-            %i %{c:%{o*}%{!o*:-o %w%b.o}}%{!c:-o %d%w%b.o}\n }"},
+   "%{!S:asm %{R} %{j} %{J} %{h} %{d2} %a %i %{c:%{o*}%{!o*:+o=%b.r}}%{!c:+o=%b.r} %W%b.r \n }"},
+  {".a",
+   "%{!S:asm %{R} %{j} %{J} %{h} %{d2} %a %i %{c:%{o*}%{!o*:+o=%b.r}}%{!c:+o=%b.r} %W%b.r \n }"},
   /* Mark end of table */
   {0, 0}
 };
 
+
 /* Here is the spec for running the linker, after compiling all files.  */
-char *link_spec = "%{!c:%{!M*:%{!E:%{!S:ld %{o*} %l\
+char *link_spec = "%{!c:%{!M*:%{!E:%{!S:load %{o*}%{!o*:+o=%b}  %l %o\
  %{A} %{d} %{e*} %{N} %{n} %{r} %{s} %{S} %{T*} %{t} %{u*} %{X} %{x} %{z}\
  %{y*} %{!nostdlib:%S} \
- %{L*} %o %{!nostdlib:gnulib%s %{g:-lg} %L}\n }}}}";
+ %{L*} %{!nostdlib:gnulib%s %{g:-lg} %L}\n }}}}";
 
 /* Record the names of temporary files we tell compilers to write,
    and delete them at the end of the run.  */
@@ -301,8 +313,8 @@ delete_temp_files (success)
 	printf ("Delete %s? (y or n) ", temp->name);
 	fflush (stdout);
 	i = getchar ();
-	if (i != '\n')
-	  while (getchar () != '\n') ;
+	if (i != NEWLINE)
+	  while (getchar () != NEWLINE) ;
 	if (i == 'y' || i == 'Y')
 #endif /* DEBUG */
 	  unlink (temp->name);
@@ -442,18 +454,23 @@ execute ()
 	  else
 	    fprintf (stderr, " %s", argbuf[i]);
 	}
-      fprintf (stderr, "\n");
+      fprintf (stderr, "\015");
       fflush (stderr);
 #ifdef DEBUG
-      fprintf (stderr, "\nGo ahead? (y or n) ");
+      fprintf (stderr, "\015Go ahead? (y or n) ");
       fflush (stderr);
       i = getchar ();
-      if (i != '\n')
-	while (getchar () != '\n') ;
+      if (i != NEWLINE)
+	while (getchar () != NEWLINE) ;
       if (i != 'y' && i != 'Y')
 	return 0;
 #endif				/* DEBUG */
     }
+
+#ifdef __APPLE__
+// skip it
+return 0;
+#endif
 
 #ifdef USG
   pid = fork ();
@@ -546,7 +563,7 @@ process_command (argc, argv)
 
   for (i = 1; i < argc; i++)
     {
-      if (argv[i][0] == '-' && argv[i][1] != 'l')
+      if ((argv[i][0] == '-' || argv[i][0] == '+') && argv[i][1] != 'l')
 	{
 	  register char *p = &argv[i][1];
 	  register int c = *p;
@@ -587,7 +604,7 @@ process_command (argc, argv)
 
   for (i = 1; i < argc; i++)
     {
-      if (argv[i][0] == '-' && argv[i][1] != 'l')
+      if ((argv[i][0] == '-' || argv[i][0] == '+') && argv[i][1] != 'l')
 	{
 	  register char *p = &argv[i][1];
 	  register int c = *p;
@@ -637,6 +654,8 @@ int delete_this_arg;
 /* Nonzero means %w has been seen; the next arg to be terminated
    is the output file name of this compilation.  */
 int this_is_output_file;
+/* Nonzero means %W has been seen; like %w but not on commandline  */
+int this_is_silent_output_file;
 
 /* Nonzero means %s has been seen; the next arg to be terminated
    is the name of a library file and we should try the standard
@@ -656,11 +675,14 @@ do_spec (spec)
   arg_going = 0;
   delete_this_arg = 0;
   this_is_output_file = 0;
+  this_is_silent_output_file = 0;
   this_is_library_file = 0;
 
   value = do_spec_1 (spec, 0);
+
   if (value == 0)
     value = do_spec_1 ("\n", 0);
+
   return value;
 }
 
@@ -681,16 +703,19 @@ do_spec_1 (spec, inswitch)
      char *spec;
      int inswitch;
 {
-  register char *p = spec;
+   char *p = spec;
   register int c;
   char *string;
 
+
   while (c = *p++)
+  
     /* If substituting a switch, treat all chars like letters.
        Otherwise, NL, SPC, TAB and % are special.  */
     switch (inswitch ? 'a' : c)
       {
       case '\n':
+      {
 	/* End of line: finish any pending argument,
 	   then run the pending command if one has been started.  */
 	if (arg_going)
@@ -699,7 +724,8 @@ do_spec_1 (spec, inswitch)
 	    string = obstack_finish (&obstack);
 	    if (this_is_library_file)
 	      string = find_file (string);
-	    store_arg (string, delete_this_arg);
+			if (this_is_silent_output_file == 0)
+		    store_arg (string, delete_this_arg);
 	    if (this_is_output_file)
 	      outfiles[input_file_number] = string;
 	  }
@@ -715,9 +741,10 @@ do_spec_1 (spec, inswitch)
 	arg_going = 0;
 	delete_this_arg = 0;
 	this_is_output_file = 0;
+	this_is_silent_output_file = 0;
 	this_is_library_file = 0;
 	break;
-
+}
       case '\t':
       case ' ':
 	/* Space or tab ends an argument if one is pending.  */
@@ -727,7 +754,8 @@ do_spec_1 (spec, inswitch)
 	    string = obstack_finish (&obstack);
 	    if (this_is_library_file)
 	      string = find_file (string);
-	    store_arg (string, delete_this_arg);
+			if (this_is_silent_output_file == 0)
+	    	store_arg (string, delete_this_arg);
 	    if (this_is_output_file)
 	      outfiles[input_file_number] = string;
 	  }
@@ -735,6 +763,7 @@ do_spec_1 (spec, inswitch)
 	arg_going = 0;
 	delete_this_arg = 0;
 	this_is_output_file = 0;
+	this_is_silent_output_file = 0;
 	this_is_library_file = 0;
 	break;
 
@@ -768,6 +797,9 @@ do_spec_1 (spec, inswitch)
 	    delete_this_arg = 2;
 	    break;
 
+	  case 'W':
+		  this_is_silent_output_file = 1;
+		  /* fallthru */
 	  case 'w':
 	    this_is_output_file = 1;
 	    break;
@@ -941,6 +973,20 @@ handle_braces (p)
 give_switch (switchnum)
      int switchnum;
 {
+	/* Uniflex style option for Uniflex commands */
+	if (strstr(argbuf[0], "asm") || strstr(argbuf[0], "load"))
+	{
+  do_spec_1 ("+", 0);
+  do_spec_1 (switches[switchnum].part1, 1);
+  if (switches[switchnum].part2 != 0)
+  {
+		  do_spec_1 ("=", 0);
+      do_spec_1 (switches[switchnum].part2, 1);
+	}
+  do_spec_1 (" ", 0);
+	}
+	else
+	{
   do_spec_1 ("-", 0);
   do_spec_1 (switches[switchnum].part1, 1);
   do_spec_1 (" ", 0);
@@ -949,6 +995,7 @@ give_switch (switchnum)
       do_spec_1 (switches[switchnum].part2, 1);
       do_spec_1 (" ", 0);
     }
+	}
 }
 
 /* Search for a file named NAME trying various prefixes including the
@@ -1076,7 +1123,7 @@ main (argc, argv)
   if (vflag)
     {
       extern char *version_string;
-      fprintf (stderr, "gcc version %s\n", version_string);
+      fprintf (stderr, "gcc version %s\015", version_string);
       if (n_infiles == 0)
 	exit (0);
     }
@@ -1151,19 +1198,19 @@ main (argc, argv)
   exit (error);
 }
 
-xmalloc (size)
+char *xmalloc (size)
      int size;
 {
-  register int value = malloc (size);
+  register char * value = malloc (size);
   if (value == 0)
     fatal ("Virtual memory full.");
   return value;
 }
 
-xrealloc (ptr, size)
+char *xrealloc (ptr, size)
      int ptr, size;
 {
-  register int value = realloc (ptr, size);
+  register char * value = realloc (ptr, size);
   if (value == 0)
     fatal ("Virtual memory full.");
   return value;
@@ -1182,7 +1229,7 @@ error (msg, arg1, arg2)
 {
   fprintf (stderr, "%s: ", programname);
   fprintf (stderr, msg, arg1, arg2);
-  fprintf (stderr, "\n");
+  fprintf (stderr, "\015");
 }
 
 /* Return a newly-allocated string whose contents concatenate those of s1, s2, s3.  */
@@ -1217,8 +1264,13 @@ save_string (s, len)
 pfatal_with_name (name)
      char *name;
 {
-  extern int errno, sys_nerr;
-  extern char *sys_errlist[];
+#ifdef __APPLE__
+  extern __const int errno, sys_nerr;
+  extern __const char *__const sys_errlist[];
+#else
+  extern  int errno, sys_nerr;
+  extern  char * sys_errlist[];
+#endif
   char *s;
 
   if (errno < sys_nerr)
@@ -1231,8 +1283,14 @@ pfatal_with_name (name)
 perror_with_name (name)
      char *name;
 {
-  extern int errno, sys_nerr;
-  extern char *sys_errlist[];
+#ifdef __APPLE__
+  extern __const int errno, sys_nerr;
+  extern __const char *__const sys_errlist[];
+#else
+  extern  int errno, sys_nerr;
+  extern  char * sys_errlist[];
+#endif
+
   char *s;
 
   if (errno < sys_nerr)
