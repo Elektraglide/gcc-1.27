@@ -303,7 +303,7 @@ print_time (str, total)
      int total;
 {
   fprintf (stderr,
-	   "time in %s: %d.%06d\n",
+	   "time in %s: %d.%06d\015",
 	   str, total / 1000000, total % 1000000);
 }
 
@@ -340,7 +340,7 @@ void
 fatal_io_error (name)
      char *name;
 {
-  fprintf (stderr, "cc1:%s: I/O error\n", name);
+  fprintf (stderr, "cc1:%s: I/O error\015", name);
   exit (35);
 }
 
@@ -383,16 +383,16 @@ report_error_function()
 {
   if (need_error_newline)
     {
-      fprintf (stderr, "\n");
+      fprintf (stderr, "\015");
       need_error_newline = 0;
     }
 
   if (last_error_function != current_function_decl)
     {
       if (current_function_decl == NULL)
-	fprintf (stderr, "At top level:\n");
+	fprintf (stderr, "At top level:\015");
       else
-	fprintf (stderr, "In function %s:\n",
+	fprintf (stderr, "In function %s:\015",
 		 IDENTIFIER_POINTER (DECL_NAME (current_function_decl)));
 
       last_error_function = current_function_decl;
@@ -431,7 +431,7 @@ error_with_file_and_line (file, line, s, v, v2)
   else
     fprintf (stderr, "cc1: ");
   fprintf (stderr, s, v, v2);
-  fprintf (stderr, "\n");
+  fprintf (stderr, "\015");
 }
 
 /* Report an error at the declaration DECL.
@@ -453,7 +453,7 @@ error_with_decl (decl, s)
     fprintf (stderr, s, IDENTIFIER_POINTER (DECL_NAME (decl)));
   else
     fprintf (stderr, s, "((anonymous))");
-  fprintf (stderr, "\n");
+  fprintf (stderr, "\015");
 }
 
 /* Report a warning at line LINE.
@@ -478,7 +478,7 @@ warning_with_line (line, s, v, v2)
 
   fprintf (stderr, "warning: ");
   fprintf (stderr, s, v, v2);
-  fprintf (stderr, "\n");
+  fprintf (stderr, "\015");
 }
 
 /* Report a warning at the current line number.
@@ -514,7 +514,7 @@ warning_with_decl (decl, s)
     fprintf (stderr, s, IDENTIFIER_POINTER (DECL_NAME (decl)));
   else
     fprintf (stderr, s, "((anonymous))");
-  fprintf (stderr, "\n");
+  fprintf (stderr, "\015");
 }
 
 /* Apologize for not implementing some feature.
@@ -533,7 +533,7 @@ sorry (s, v, v2)
 
   fprintf (stderr, "sorry, not implemented: ");
   fprintf (stderr, s, v, v2);
-  fprintf (stderr, "\n");
+  fprintf (stderr, "\015");
 }
 
 /* Apologize for not implementing some feature, then quit.
@@ -551,7 +551,7 @@ really_sorry (s, v, v2)
 
   fprintf (stderr, "sorry, not implemented: ");
   fprintf (stderr, s, v, v2);
-  fatal (" (fatal)\n");
+  fatal (" (fatal)\015");
 }
 
 /* When `malloc.c' is compiled with `rcheck' defined,
@@ -887,7 +887,7 @@ compile_file (name)
 	       fstat (fileno (finput), &statbuf);
 	       symout_types (get_permanent_types ());
 	       symout_top_blocks (globals, gettags ());
-	       symout_finish (name, statbuf.st_ctime);
+	       symout_finish (name, statbuf.st_mtime);
 	     });
 
   /* Close the dump files.  */
@@ -933,7 +933,7 @@ compile_file (name)
 
   if (! quiet_flag)
     {
-      fprintf (stderr,"\n");
+      fprintf (stderr,"\015");
       print_time ("parse", parse_time);
       print_time ("integration", integration_time);
       print_time ("jump", jump_time);
@@ -1045,10 +1045,10 @@ rest_of_compilation (decl)
       if (rtl_dump)
 	TIMEVAR (dump_time,
 		 {
-		   fprintf (rtl_dump_file, "\n;; Function %s\n\n",
+		   fprintf (rtl_dump_file, "\015;; Function %s\015\015",
 			    IDENTIFIER_POINTER (DECL_NAME (decl)));
 		   if (DECL_SAVED_INSNS (decl))
-		     fprintf (rtl_dump_file, ";; (integrable)\n\n");
+		     fprintf (rtl_dump_file, ";; (integrable)\015\015");
 		   print_rtl (rtl_dump_file, insns);
 		   fflush (rtl_dump_file);
 		 });
@@ -1092,7 +1092,7 @@ rest_of_compilation (decl)
   if (jump_opt_dump)
     TIMEVAR (dump_time,
 	     {
-	       fprintf (jump_opt_dump_file, "\n;; Function %s\n\n",
+	       fprintf (jump_opt_dump_file, "\015;; Function %s\015\015",
 			IDENTIFIER_POINTER (DECL_NAME (decl)));
 	       print_rtl (jump_opt_dump_file, insns);
 	       fflush (jump_opt_dump_file);
@@ -1118,7 +1118,7 @@ rest_of_compilation (decl)
   if (cse_dump)
     TIMEVAR (dump_time,
 	     {
-	       fprintf (cse_dump_file, "\n;; Function %s\n\n",
+	       fprintf (cse_dump_file, "\015;; Function %s\015\015",
 			IDENTIFIER_POINTER (DECL_NAME (decl)));
 	       print_rtl (cse_dump_file, insns);
 	       fflush (cse_dump_file);
@@ -1127,7 +1127,7 @@ rest_of_compilation (decl)
   if (loop_dump)
     TIMEVAR (dump_time,
 	     {
-	       fprintf (loop_dump_file, "\n;; Function %s\n\n",
+	       fprintf (loop_dump_file, "\015;; Function %s\015\015",
 			IDENTIFIER_POINTER (DECL_NAME (decl)));
 	     });
 
@@ -1167,7 +1167,7 @@ rest_of_compilation (decl)
   if (flow_dump)
     TIMEVAR (dump_time,
 	     {
-	       fprintf (flow_dump_file, "\n;; Function %s\n\n",
+	       fprintf (flow_dump_file, "\015;; Function %s\015\015",
 			IDENTIFIER_POINTER (DECL_NAME (decl)));
 	     });
 
@@ -1210,7 +1210,7 @@ rest_of_compilation (decl)
   if (combine_dump)
     TIMEVAR (dump_time,
 	     {
-	       fprintf (combine_dump_file, "\n;; Function %s\n\n",
+	       fprintf (combine_dump_file, "\015;; Function %s\015\015",
 			IDENTIFIER_POINTER (DECL_NAME (decl)));
 	       dump_combine_stats (combine_dump_file);
 	       print_rtl (combine_dump_file, insns);
@@ -1232,7 +1232,7 @@ rest_of_compilation (decl)
   if (local_reg_dump)
     TIMEVAR (dump_time,
 	     {
-	       fprintf (local_reg_dump_file, "\n;; Function %s\n\n",
+	       fprintf (local_reg_dump_file, "\015;; Function %s\015\015",
 			IDENTIFIER_POINTER (DECL_NAME (decl)));
 	       dump_flow_info (local_reg_dump_file);
 	       dump_local_alloc (local_reg_dump_file);
@@ -1242,7 +1242,7 @@ rest_of_compilation (decl)
 
   if (global_reg_dump)
     TIMEVAR (dump_time,
-	     fprintf (global_reg_dump_file, "\n;; Function %s\n\n",
+	     fprintf (global_reg_dump_file, "\015;; Function %s\015\015",
 		      IDENTIFIER_POINTER (DECL_NAME (decl))));
 
   /* Unless we did stupid register allocation,
@@ -1281,7 +1281,7 @@ rest_of_compilation (decl)
   if (jump2_opt_dump)
     TIMEVAR (dump_time,
 	     {
-	       fprintf (jump2_opt_dump_file, "\n;; Function %s\n\n",
+	       fprintf (jump2_opt_dump_file, "\015;; Function %s\015\015",
 			IDENTIFIER_POINTER (DECL_NAME (decl)));
 	       print_rtl (jump2_opt_dump_file, insns);
 	       fflush (jump2_opt_dump_file);
@@ -1380,7 +1380,7 @@ main (argc, argv, envp)
   for (i = 1; i < argc; i++)
     if (argv[i][0] == '-')
       {
-	register char *str = argv[i] + 1;
+	 char *str = argv[i] + 1;
 	if (str[0] == 'Y')
 	  str++;
 
@@ -1494,9 +1494,9 @@ main (argc, argv, envp)
 #ifndef __VERSION__
 #define __VERSION__ "[unknown]"
 #endif
-	    printf (" compiled by GNU C version %s.\n", __VERSION__);
+	    printf (" compiled by GNU C version %s.\015", __VERSION__);
 #else
-	    printf (" compiled by CC.\n");
+	    printf (" compiled by CC.\015");
 #endif
 	  }
 	else if (!strcmp (str, "w"))
@@ -1558,7 +1558,7 @@ main (argc, argv, envp)
       extern char **environ;
       caddr_t lim = (caddr_t) sbrk (0);
       
-      fprintf (stderr, "Data size %d.\n",
+      fprintf (stderr, "Data size %d.\015",
 	       (int) lim - (int) &environ);
       fflush (stderr);
 
