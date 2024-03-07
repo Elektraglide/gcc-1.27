@@ -77,8 +77,8 @@ extern double atof ();
 /* List of types and structure classes of the current declaration */
 tree current_declspecs;
 
-char *input_filename;		/* source file current line is coming from */
-char *main_input_filename;	/* top-level source file */
+extern char *input_filename;		/* source file current line is coming from */
+extern char *main_input_filename;	/* top-level source file */
 
 static int yylex ();
 
@@ -2576,7 +2576,7 @@ skip_white_space (c)
 		      c = getc (finput);
 		    }
 		}
-	      else if (c == '\n')
+	      else if (c == TARGET_NEWLINE)
 		{
 		  lineno++;
 		  c = getc (finput);
@@ -2592,21 +2592,21 @@ skip_white_space (c)
 
 	  break;
 
-	case '\n':
+	case TARGET_NEWLINE:
 	  c = check_newline ();
 	  break;
 
 	case ' ':
 	case '\t':
 	case '\f':
-	case '\r':
+	case '\n':
 	case '\b':
 	  c = getc (finput);
 	  break;
 
 	case '\\':
 	  c = getc (finput);
-	  if (c == '\n')
+	  if (c == TARGET_NEWLINE)
 	    lineno++;
 	  else
 	    error ("stray '\\' in program");
@@ -2718,7 +2718,7 @@ check_newline ()
 		    c = getc (finput);
 
 		  /* If no argument, ignore the line.  */
-		  if (c == '\n')
+		  if (c == TARGET_NEWLINE)
 		    continue;
 
 		  ungetc (c, finput);
@@ -2734,7 +2734,7 @@ check_newline ()
 			   TREE_STRING_POINTER (yylval.ttype));
 
 		  /* Skip the rest of this line.  */
-		  while ((c = getc (finput)) && c != '\n');
+		  while ((c = getc (finput)) && c != TARGET_NEWLINE);
 		  if (c == 0)
 		    return 0;
 		  continue;
@@ -2745,7 +2745,7 @@ check_newline ()
 	  error ("undefined or invalid # directive");
 	noerror:
 
-	  while ((c = getc (finput)) && c != '\n');
+	  while ((c = getc (finput)) && c != TARGET_NEWLINE);
 
 	  if (c == 0)
 	    return 0;
@@ -2761,7 +2761,7 @@ check_newline ()
 
       /* If the # is the only nonwhite char on the line,
 	 just ignore it.  Check the new newline.  */
-      if (c == '\n')
+      if (c == TARGET_NEWLINE)
 	continue;
 
       /* Something follows the #; read a token.  */
@@ -2781,7 +2781,7 @@ check_newline ()
 	  c = getc (finput);
 	  while (c == ' ' || c == '\t')
 	    c = getc (finput);
-	  if (c == '\n')
+	  if (c == TARGET_NEWLINE)
 	    {
 	      /* No more: store the line number and check following line.  */
 	      lineno = l;
@@ -2810,7 +2810,7 @@ check_newline ()
 	error ("invalid #line");
 
       /* skip the rest of this line.  */
-      while ((c = getc (finput)) && c != '\n');
+      while ((c = getc (finput)) && c != TARGET_NEWLINE);
       if (c == 0)
 	return 0;
     }
@@ -2870,7 +2870,7 @@ readescape ()
     case '\\': case '\'': case '"':
       return c;
 
-    case '\n':
+    case TARGET_NEWLINE:
       lineno++;
       return -1;
 
@@ -3393,7 +3393,7 @@ yylex ()
 	    if (c < 0)
 	      goto tryagain;
 	  }
-	else if (c == '\n')
+	else if (c == TARGET_NEWLINE)
 	  {
 	    if (pedantic)
 	      warning ("ANSI C forbids newline in character constant");
@@ -3434,7 +3434,7 @@ yylex ()
 		if (c < 0)
 		  goto skipnewline;
 	      }
-	    else if (c == '\n')
+	    else if (c == TARGET_NEWLINE)
 	      {
 		if (pedantic)
 		  warning ("ANSI C forbids newline in string constant");
