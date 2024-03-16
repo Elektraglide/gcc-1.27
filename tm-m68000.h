@@ -186,9 +186,12 @@ extern int target_flags;
    The latter must include the registers where values are returned
    and the register where structure-value addresses are passed.
    Aside from that, you can include as many other registers as you like.  */
+   
+/* AB:  Uniflex seems to clobber d2 */
+/* AB:  Uniflex seems to clobber a2 */
 #define CALL_USED_REGISTERS \
- {1, 1, 0, 0, 0, 0, 0, 0, \
-  1, 1, 0, 0, 0, 0, 0, 1, \
+ {1, 1, 1, 0, 0, 0, 0, 0, \
+  1, 1, 1, 0, 0, 0, 0, 1, \
   1, 1, 0, 0, 0, 0, 0, 0, \
   /* FPA registers.  */   \
   1, 1, 1, 1, 0, 0, 0, 0, \
@@ -1208,7 +1211,7 @@ extern enum reg_class regno_reg_class[];
    defined for reference from other files.  */
 
 #define ASM_GLOBALIZE_LABEL(FILE,NAME)	\
-  do { fputs ("global ", FILE); assemble_name (FILE, NAME); fputs ("\n", FILE);} while (0)
+  do { fputs (".globl ", FILE); assemble_name (FILE, NAME); fputs ("\n", FILE);} while (0)
 
 /* This is how to output a reference to a user-level label named NAME.
    `assemble_name' uses this.  */
