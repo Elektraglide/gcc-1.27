@@ -7,6 +7,8 @@
 
 #define TARGET_DEFAULT 0
 
+#define STANDARD_EXEC_PREFIX "/bin/cpasses/"
+
 #define STARTFILE_SPEC  "%{pg:/lib/Cwrapper.r%s}%{!pg:%{p:/lib/Cwrapper.r%s}%{!p:/lib/Cwrapper.r%s}}"
   
 #define ASM_SPEC "+u"
@@ -78,6 +80,19 @@
 #define ASM_OUTPUT_SKIP(FILE,SIZE)  \
   fprintf (FILE, "\trmb %d\015", (SIZE))
 
+#undef ASM_OUTPUT_COMMON
+#define ASM_OUTPUT_COMMON(FILE, NAME, SIZE, ROUNDED)  \
+( fputs ("\tglobal ", (FILE)),			\
+  assemble_name ((FILE), (NAME)),		\
+  fputs ("\015\tbss\015", (FILE)),			\
+  assemble_name ((FILE), (NAME)),		\
+  fprintf ((FILE), "\trab %d\015", (ROUNDED)))
+  
+#undef ASM_OUTPUT_LOCAL
+#define ASM_OUTPUT_LOCAL(FILE, NAME, SIZE, ROUNDED)  \
+(  fputs ("\tbss\015", (FILE)),			\
+  assemble_name ((FILE), (NAME)),		\
+  fprintf ((FILE), "\trab %d\015", (ROUNDED)))
 
 
 #undef ASM_OUTPUT_ALIGN
@@ -95,9 +110,9 @@
       register int c = p[i];				\
       if ((i / 40) * 40 == i)				\
       if (i == 0)					\
-        fprintf (file, "\tfcb \"");			\
+        fprintf (file, "\tfcc \"");			\
       else						\
-        fprintf (file, "\"\015\tfcb \"");		\
+        fprintf (file, "\"\015\tfcc \"");		\
       if (c == '\"' || c == '\\')			\
         putc ('\\', file);				\
       if (c >= ' ' && c < 0177)				\
@@ -107,12 +122,22 @@
           fprintf (file, "\\%3.3o", c);			\
           if (i < size - 1 				\
               && p[i + 1] >= '0' && p[i + 1] <= '9')	\
-          fprintf (file, "\"\015\tfcb \"");		\
+          fprintf (file, "\"\015\tfcc \"");		\
         }						\
     }							\
   fprintf (file, "\",0\015");				\
 }
 
+#undef ASM_OUTPUT_OPCODE
+#define ASM_OUTPUT_OPCODE(FILE, PTR)			\
+{ if ((PTR)[0] == 'j' && (PTR)[1] == 'b')		\
+    { ++(PTR);						\
+      while (*(PTR) != ' ')				\
+	{ putc (*(PTR), (FILE)); ++(PTR); }		\
+      fprintf ((FILE), ".w"); }				\
+}
+
+  
 #undef FUNCTION_PROLOGUE
 #define FUNCTION_PROLOGUE(FILE, SIZE)     \
 { register int regno;						\
@@ -124,7 +149,7 @@
     { if (fsize < 0x8000)			\
         fprintf (FILE, "\tlink a6,#%d\015", -fsize);		\
       else							\
-	fprintf (FILE, "\tlink a6,#0\015\tsubl #%d,sp\015", fsize); }  \
+	fprintf (FILE, "\tlink a6,#0\015\tsub.l #%d,sp\015", fsize); }  \
   for (regno = 24; regno < 56; regno++)				\
     if (regs_ever_live[regno] && ! call_used_regs[regno])	\
       fprintf(FILE, "\tfpmoved %s, -(sp)\015",			\
@@ -175,7 +200,7 @@
   if (offset + fsize >= 0x8000 					\
       && frame_pointer_needed 					\
       && (mask || fmask || fpoffset)) 				\
-    { fprintf (FILE, "\tmovel #%d,a0\015", -fsize);		\
+    { fprintf (FILE, "\tmove.l #%d,a0\015", -fsize);		\
       fsize = 0, big = 1; }					\
   if (exact_log2 (mask) >= 0) {					\
     if (big)							\
@@ -185,7 +210,7 @@
       fprintf (FILE, "\tmove.l (sp)+,%s\015",			\
 	       reg_names[exact_log2 (mask)]);			\
     else							\
-      fprintf (FILE, "\tmove.l a6@(-%d),%s\015",			\
+      fprintf (FILE, "\tmove.l -%d(a6),%s\015",			\
 	       offset + fsize, reg_names[exact_log2 (mask)]); }	\
   else if (mask) {						\
     if (big)							\
@@ -194,7 +219,7 @@
     else if (! frame_pointer_needed)				\
       fprintf (FILE, "\tmovem.l (sp)+,#0x%x\015", mask);		\
     else							\
-      fprintf (FILE, "\tmovem.l a6@(-%d),#0x%x\015",		\
+      fprintf (FILE, "\tmovem.l -%d(a6),#0x%x\015",		\
 	       offset + fsize, mask); }				\
   if (fmask) {							\
     if (big)							\
@@ -203,7 +228,7 @@
     else if (! frame_pointer_needed)				\
       fprintf (FILE, "\tfmovem (sp)+,#0x%x\015", fmask);		\
     else							\
-      fprintf (FILE, "\tfmovem a6@(-%d),#0x%x\015",		\
+      fprintf (FILE, "\tfmovem -%d(a6),#0x%x\015",		\
 	       foffset + fsize, fmask); }			\
   if (fpoffset != 0)						\
     for (regno = 55; regno >= 24; regno--)			\
@@ -228,7 +253,7 @@
 #undef PRINT_OPERAND
 #define PRINT_OPERAND(FILE, X, CODE)  \
 { int i;								\
-  if (CODE == '.') ;							\
+  if (CODE == '.') fprintf (FILE, ".");							\
   else if (CODE == '#') fprintf (FILE, "#");				\
   else if (CODE == '-') fprintf (FILE, "-(sp)");				\
   else if (CODE == '+') fprintf (FILE, "(sp)+");				\
@@ -357,12 +382,12 @@
 	    { scale = INTVAL (XEXP (ireg, 1));				\
 	      ireg = XEXP (ireg, 0); }					\
 	  if (GET_CODE (ireg) == SIGN_EXTEND)				\
-	    fprintf (FILE, "pc@(L%d-LI%d-2:b,%s:w",			\
+	    fprintf (FILE, "L%d-LI%d(pc,%s.w",			\
 		     CODE_LABEL_NUMBER (XEXP (addr, 0)),		\
 		     CODE_LABEL_NUMBER (XEXP (addr, 0)),		\
 		     reg_name[REGNO (XEXP (ireg, 0))]); 		\
 	  else								\
-	    fprintf (FILE, "pc@(L%d-LI%d-2:b,%s:l",			\
+	    fprintf (FILE, "L%d-LI%d(pc,%s.l",			\
 		     CODE_LABEL_NUMBER (XEXP (addr, 0)),		\
 		     CODE_LABEL_NUMBER (XEXP (addr, 0)),		\
 		     reg_name[REGNO (ireg)]);				\
@@ -380,25 +405,25 @@
 	{ int scale = 1;						\
 	  if (breg == 0)						\
 	    abort ();							\
-	  if (addr && GET_CODE (addr) == LABEL_REF) abort ();		\
-	  fprintf (FILE, "%s@(", reg_name[REGNO (breg)]);		\
 	  if (addr != 0)						\
 	    output_addr_const (FILE, addr);				\
-	  if (addr != 0 && ireg != 0)					\
+	  fprintf (FILE, "(%s", reg_name[REGNO (breg)]);		\
+	  if (ireg != 0)						\
 	    putc (',', FILE);						\
 	  if (ireg != 0 && GET_CODE (ireg) == MULT)			\
 	    { scale = INTVAL (XEXP (ireg, 1));				\
 	      ireg = XEXP (ireg, 0); }					\
 	  if (ireg != 0 && GET_CODE (ireg) == SIGN_EXTEND)		\
-	    fprintf (FILE, "%s:w", reg_name[REGNO (XEXP (ireg, 0))]);	\
+	    fprintf (FILE, "%s.w", reg_name[REGNO (XEXP (ireg, 0))]);	\
 	  else if (ireg != 0)						\
-	    fprintf (FILE, "%s:l", reg_name[REGNO (ireg)]);		\
-	  if (scale != 1) fprintf (FILE, ":%d", scale);			\
+	    fprintf (FILE, "%s.l", reg_name[REGNO (ireg)]);		\
+	  if (scale != 1) fprintf (FILE, "*%d", scale);			\
 	  putc (')', FILE);						\
 	  break;							\
+					\
 	}								\
       else if (reg1 != 0 && GET_CODE (addr) == LABEL_REF)		\
-	{ fprintf (FILE, "pc@(L%d-LI%d-2:b,%s:l)",			\
+	{ fprintf (FILE, "L%d-LI%d(%%pc,%s.w)",			\
 		   CODE_LABEL_NUMBER (XEXP (addr, 0)),			\
 		   CODE_LABEL_NUMBER (XEXP (addr, 0)),			\
 		   reg_name[REGNO (reg1)]);				\
