@@ -894,9 +894,12 @@ extern enum reg_class regno_reg_class[];
   if (GET_CODE (X) == REG && REG_OK_FOR_BASE_P (X)) goto ADDR; }
 
 #define GO_IF_INDEXING(X, ADDR)	\
-{ if (GET_CODE (X) == PLUS && LEGITIMATE_INDEX_P (XEXP (X, 0)))		\
+{ int cond0_temp,cond1_temp; \
+  cond0_temp = LEGITIMATE_INDEX_P (XEXP (X, 0)); \
+  cond1_temp = LEGITIMATE_INDEX_P (XEXP (X, 1)); \
+  if (GET_CODE (X) == PLUS && cond0_temp)		\
     { GO_IF_INDEXABLE_BASE (XEXP (X, 1), ADDR); }			\
-  if (GET_CODE (X) == PLUS && LEGITIMATE_INDEX_P (XEXP (X, 1)))		\
+  if (GET_CODE (X) == PLUS && cond1_temp)		\
     { GO_IF_INDEXABLE_BASE (XEXP (X, 0), ADDR); } }
 
 #define GO_IF_INDEXED_ADDRESS(X, ADDR)	 \

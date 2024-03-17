@@ -41,3 +41,5 @@ and this notice must be preserved on all copies.  */
 #ifdef __GNUC__
 #define alloca __builtin_alloca
 #endif
+
+#define USG

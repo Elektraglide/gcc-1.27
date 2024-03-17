@@ -42,7 +42,7 @@ and this notice must be preserved on all copies.  */
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 
-extern int xmalloc ();
+extern char * xmalloc ();
 extern void free ();
 
 /* Tree nodes of permanent duration are allocated in this obstack.

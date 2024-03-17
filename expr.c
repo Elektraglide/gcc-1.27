@@ -1956,6 +1956,9 @@ expand_expr (exp, target, tmode, modifier)
      enum machine_mode tmode;
      enum expand_modifier modifier;
 {
+union tree_node *to0;
+union tree_node *to1;
+
   register rtx op0, op1, temp;
   tree type = TREE_TYPE (exp);
   register enum machine_mode mode = TYPE_MODE (type);
@@ -2415,25 +2418,29 @@ expand_expr (exp, target, tmode, modifier)
 	 from a narrower type.  If this machine supports multiplying
 	 in that narrower type with a result in the desired type,
 	 do it that way, and avoid the explicit type-conversion.  */
-      if (TREE_CODE (TREE_OPERAND (exp, 0)) == NOP_EXPR
+  
+  		to0 = TREE_OPERAND (exp, 0);
+	    to1 = TREE_OPERAND (exp, 1);
+  
+      if (TREE_CODE (to0) == NOP_EXPR
 	  && TREE_CODE (TREE_TYPE (exp)) == INTEGER_TYPE
-	  && (TYPE_PRECISION (TREE_TYPE (TREE_OPERAND (TREE_OPERAND (exp, 0), 0)))
-	      < TYPE_PRECISION (TREE_TYPE (TREE_OPERAND (exp, 0))))
-	  && ((TREE_CODE (TREE_OPERAND (exp, 1)) == INTEGER_CST
-	       && int_fits_type_p (TREE_OPERAND (exp, 1),
-				   TREE_TYPE (TREE_OPERAND (TREE_OPERAND (exp, 0), 0)))
+	  && (TYPE_PRECISION (TREE_TYPE (TREE_OPERAND (to0, 0)))
+	      < TYPE_PRECISION (TREE_TYPE (to0)))
+	  && ((TREE_CODE (to1) == INTEGER_CST
+	       && int_fits_type_p (to1,
+				   TREE_TYPE (TREE_OPERAND (to0, 0)))
 	       /* Don't use a widening multiply if a shift will do.  */
-	       && exact_log2 (TREE_INT_CST_LOW (TREE_OPERAND (exp, 1))) < 0)
+	       && exact_log2 (TREE_INT_CST_LOW (to1)) < 0)
 	      ||
-	      (TREE_CODE (TREE_OPERAND (exp, 1)) == NOP_EXPR
-	       && (TYPE_PRECISION (TREE_TYPE (TREE_OPERAND (TREE_OPERAND (exp, 1), 0)))
+	      (TREE_CODE (to1) == NOP_EXPR
+	       && (TYPE_PRECISION (TREE_TYPE (TREE_OPERAND (to1, 0)))
 		   ==
-		   TYPE_PRECISION (TREE_TYPE (TREE_OPERAND (TREE_OPERAND (exp, 0), 0))))
+		   TYPE_PRECISION (TREE_TYPE (TREE_OPERAND (to0, 0))))
 	       /* If both operands are extended, they must either both
 		  be zero-extended or both be sign-extended.  */
-	       && (TREE_UNSIGNED (TREE_TYPE (TREE_OPERAND (TREE_OPERAND (exp, 1), 0)))
+	       && (TREE_UNSIGNED (TREE_TYPE (TREE_OPERAND (to1, 0)))
 		   ==
-		   TREE_UNSIGNED (TREE_TYPE (TREE_OPERAND (TREE_OPERAND (exp, 0), 0)))))))
+		   TREE_UNSIGNED (TREE_TYPE (TREE_OPERAND (to0, 0)))))))
 	{
 	  enum machine_mode innermode
 	    = TYPE_MODE (TREE_TYPE (TREE_OPERAND (TREE_OPERAND (exp, 0), 0)));

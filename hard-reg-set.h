@@ -190,7 +190,7 @@ extern int reg_alloc_order[FIRST_PSEUDO_REGISTER];
 
 /* For each reg class, a HARD_REG_SET saying which registers are in it.  */
 
-extern HARD_REG_SET reg_class_contents[];
+extern HARD_REG_SET reg_class_contents[LIM_REG_CLASSES];
 
 /* For each reg class, number of regs it contains.  */
 

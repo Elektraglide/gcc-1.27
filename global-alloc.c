@@ -275,6 +275,8 @@ global_alloc (file)
 	if (allocno_size[i] == 0)
 	  allocno_size[i] = 1;
 
+extern void qsort();
+
       qsort (allocno_order, max_allocno, sizeof (int), allocno_compare);
 
       if (file)

@@ -1218,6 +1218,10 @@ order_regs_for_reload ()
       hard_reg_n_uses[i].uses = large;
   hard_reg_n_uses[FRAME_POINTER_REGNUM].uses = large;
 
+#ifdef __clang__
+extern void qsort();
+#endif
+
   qsort (hard_reg_n_uses, FIRST_PSEUDO_REGISTER,
 	 sizeof hard_reg_n_uses[0], hard_reg_use_compare);
 

@@ -43,7 +43,7 @@ struct obstack *rtl_obstack = &obstack;
 
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
-extern int xmalloc ();
+extern char * xmalloc ();
 extern void free ();
 
 /* Data structure for decision tree for recognizing
@@ -384,6 +384,22 @@ merge_trees (old, add)
    Returns 1 if successful (OLD is modified),
    0 if nothing has been done.  */
 
+int simply(old, add)
+struct decision *old, *add;
+{
+	return  (old->tests == add->tests
+	      || (old->tests && add->tests && !strcmp (old->tests, add->tests)))
+	  && (old->c_test == add->c_test
+	      || (old->c_test && add->c_test && !strcmp (old->c_test, add->c_test)))
+	  && old->test_elt_zero_int == add->test_elt_zero_int
+	  && old->elt_zero_int == add->elt_zero_int
+	  && old->test_elt_one_int == add->test_elt_one_int
+	  && old->elt_one_int == add->elt_one_int
+	  && old->veclen == add->veclen
+	  && old->dupno == add->dupno
+	  && old->opno == add->opno;
+}
+
 int
 try_merge_1 (old, add)
      register struct decision *old, *add;
@@ -393,6 +409,8 @@ try_merge_1 (old, add)
       if ((old->position == add->position
 	   || (old->position && add->position
 	       && !strcmp (old->position, add->position)))
+		&& simply(old, add)
+/*
 	  && (old->tests == add->tests
 	      || (old->tests && add->tests && !strcmp (old->tests, add->tests)))
 	  && (old->c_test == add->c_test
@@ -404,6 +422,7 @@ try_merge_1 (old, add)
 	  && old->veclen == add->veclen
 	  && old->dupno == add->dupno
 	  && old->opno == add->opno
+*/
 	  && (old->tests == 0
 	      || (add->enforce_mode ? no_same_mode (old) : old->next == 0))
 	  && old->code == add->code
@@ -953,21 +972,21 @@ concat (s1, s2)
   return tem;
 }
 
-int
+char *
 xrealloc (ptr, size)
      char *ptr;
      int size;
 {
-  int result = realloc (ptr, size);
+  char * result = realloc (ptr, size);
   if (!result)
     fatal ("virtual memory exhausted");
   return result;
 }
 
-int
+char *
 xmalloc (size)
 {
-  register int val = malloc (size);
+  register char * val = malloc (size);
 
   if (val == 0)
     fatal ("virtual memory exhausted");

@@ -207,7 +207,7 @@ struct _obstack_chunk		/* Lives at front of each chunk. */
 {
   char  *limit;			/* 1 past end of this chunk */
   struct _obstack_chunk *prev;	/* address of prior chunk or NULL */
-  char	contents[4];		/* objects begin here */
+  char	contents[8];		/* objects begin here */
 };
 
 struct obstack		/* control current object in current chunk */

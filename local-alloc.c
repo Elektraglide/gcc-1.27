@@ -551,6 +551,9 @@ block_alloc (b)
 #define EXCHANGE(I1, I2)  \
   { i = qty_order[I1]; qty_order[I1] = qty_order[I2]; qty_order[I2] = i; }
 
+
+extern void qsort();
+
   if (next_qty == 2 + FIRST_PSEUDO_REGISTER)
     {
       if (qty_compare (FIRST_PSEUDO_REGISTER, FIRST_PSEUDO_REGISTER + 1) > 0)

@@ -27,6 +27,7 @@ and this notice must be preserved on all copies.  */
 #include <stdio.h>
 #undef NULL
 #include "stddef.h"
+#include <time.h>
 
 /* Get N_SO from stab.h if we can expect the file to exist.  */
 #ifdef DBX_DEBUGGING_INFO
@@ -1122,6 +1123,8 @@ symout_sources ()
    and close the symbol table file.  FILETIME is source file's
    creation time.  */
 
+extern long time();
+
 void
 symout_finish (filename, filetime)
      char *filename;
@@ -1181,6 +1184,9 @@ symout_finish (filename, filetime)
   buffer.bssrel = 0;		/* looking at the .o file in gdb.  */
   buffer.ldsymoff = 0;
 
+extern char *ctime();
+extern char *getcwd();
+
   buffer.version = (char *) next_address;
   symout_strings (ctime (&filetime), 0, 0, 0);
 
@@ -1208,6 +1214,11 @@ symout_finish (filename, filetime)
     fatal_io_error (symfile_name);
 
   buffer.length = next_address;
+
+#ifdef __clang__
+extern off_t lseek();
+extern ssize_t write();
+#endif
 
   if (lseek (fileno (symfile), 0, 0) < 0)
     pfatal_with_name (symfile_name);

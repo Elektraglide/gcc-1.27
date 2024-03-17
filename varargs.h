@@ -1,3 +1,7 @@
+/* AB: we want non-ANSI macros */
+#define __GNUC__
+
+
 #ifndef __GNUC__
 /* Use the system's macros with the system's compiler.  */
 #include <varargs.h>

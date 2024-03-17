@@ -2730,7 +2730,7 @@ check_newline ()
 		      return getc (finput);
 		    }
 
-		  fprintf (asm_out_file, "\t.ident \"%s\"\n",
+		  fprintf (asm_out_file, "\t.ident \"%s\"\015",
 			   TREE_STRING_POINTER (yylval.ttype));
 
 		  /* Skip the rest of this line.  */
@@ -2957,12 +2957,12 @@ yylex ()
       case ' ':
       case '\t':
       case '\f':
-      case '\r':
+      case '\n':
       case '\b':
 	c = getc (finput);
 	break;
 
-      case '\n':
+      case TARGET_NEWLINE:
       case '/':
       case '\\':
 	c = skip_white_space (c);

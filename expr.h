@@ -191,7 +191,7 @@ enum optab_methods
   OPTAB_DIRECT,
   OPTAB_LIB,
   OPTAB_WIDEN,
-  OPTAB_LIB_WIDEN,
+  OPTAB_LIB_WIDEN
 };
 
 typedef rtx (*rtxfun) ();

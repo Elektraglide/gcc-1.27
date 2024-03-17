@@ -226,7 +226,7 @@ struct compiler compilers[] =
 		   %{v:-version} %{gg:-symout %g.sym} %{pg:-p} %{p}\
 		   %{S:%{o*}%{!o*:-o %b.s}}%{!S:-o %g.s}\n\
               %{!S:asm %{R} %{j} %{J} %{h} %{d2} %a %{gg:-G %g.sym}\
-                      %g.s %{c:%{o*}%{!o*:+o=%b.r}}%{!c:+o=%b.r} %W%b.r\n }}}"},
+                      %g.s %{!v:+e} %{c:%{o*}%{!o*:+o=%b.r}}%{!c:+o=%b.r} %W%b.r\n }}}"},
   {".i",
    "cc1 %i %1 %{!Q:-quiet} %{Y*} %{d*} %{m*} %{f*}\
  %{g} %{O} %{W*} %{w} %{ansi} %{traditional}\
@@ -235,9 +235,9 @@ struct compiler compilers[] =
     %{!S:asm %{R} %{j} %{J} %{h} %{d2} %a %{gg:-G %g.sym}\
  %g.s %{c:%{o*}%{!o*:+o=%w%b.r}}%{!c:+o=%d%w%b.r} %W%b.r\n }"},
   {".s",
-   "%{!S:asm %{R} %{j} %{J} %{h} %{d2} %a %i %{c:%{o*}%{!o*:+o=%b.r}}%{!c:+o=%b.r} %W%b.r \n }"},
+   "%{!S:asm %{R} %{j} %{J} %{h} %{d2} %a %i %{!v:+e} %{c:%{o*}%{!o*:+o=%b.r}}%{!c:+o=%b.r} %W%b.r \n }"},
   {".a",
-   "%{!S:asm %{R} %{j} %{J} %{h} %{d2} %a %i %{c:%{o*}%{!o*:+o=%b.r}}%{!c:+o=%b.r} %W%b.r \n }"},
+   "%{!S:asm %{R} %{j} %{J} %{h} %{d2} %a %i %{!v:+e} %{c:%{o*}%{!o*:+o=%b.r}}%{!c:+o=%b.r} %W%b.r \n }"},
   /* Mark end of table */
   {0, 0}
 };

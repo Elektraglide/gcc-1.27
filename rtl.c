@@ -32,7 +32,8 @@ and this notice must be preserved on all copies.  */
 #include "obstack.h"
 #define	obstack_chunk_alloc	xmalloc
 #define	obstack_chunk_free	free
-extern int xmalloc ();
+extern char * xmalloc ();
+extern char * xrealloc ();
 extern void free ();
 
 /* Obstack used for allocating RTL objects.
@@ -871,26 +872,27 @@ read_skip_spaces (infile)
       if (c == ' ' || c == '\n' || c == '\t' || c == '\f')
 	;
       else if (c == ';')
-	{
-	  while ((c = getc (infile)) && c != '\n') ;
-	}
+			{
+				while ((c = getc (infile)) && c != '\n') ;
+			}
       else if (c == '/')
-	{
-	  register int prevc;
-	  c = getc (infile);
-	  if (c != '*')
-	    dump_and_abort ('*', c, infile);
-	  
-	  prevc = 0;
-	  while (c = getc (infile))
-	    {
-	      if (prevc == '*' && c == '/')
-		break;
-	      prevc = c;
-	    }
-	}
+			{
+				register int prevc;
+				c = getc (infile);
+				if (c != '*')
+					dump_and_abort ('*', c, infile);
+				
+				prevc = 0;
+				while (c = getc (infile))
+					{
+						if (prevc == '*' && c == '/')
+				break;
+						prevc = c;
+					}
+			}
       else break;
     }
+
   return c;
 }
 

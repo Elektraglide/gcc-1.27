@@ -101,7 +101,7 @@ struct obstack *rtl_obstack = &obstack;
 
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
-extern int xmalloc ();
+extern char * xmalloc ();
 extern void free ();
 
 void fatal ();
@@ -566,22 +566,22 @@ gen_expand (insn)
   d->outfun = 0;
 }
 
-int
+char *
 xmalloc (size)
 {
-  register int val = malloc (size);
+  register char * val = malloc (size);
 
   if (val == 0)
     fatal ("virtual memory exhausted");
   return val;
 }
 
-int
+char *
 xrealloc (ptr, size)
      char *ptr;
      int size;
 {
-  int result = realloc (ptr, size);
+  char * result = realloc (ptr, size);
   if (!result)
     fatal ("virtual memory exhausted");
   return result;

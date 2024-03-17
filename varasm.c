@@ -46,7 +46,7 @@ extern struct obstack *current_obstack;
 extern struct obstack *saveable_obstack;
 extern struct obstack permanent_obstack;
 #define obstack_chunk_alloc xmalloc
-extern int xmalloc ();
+extern char * xmalloc ();
 
 /* Number for making the label on the next
    constant that is stored in memory.  */
@@ -76,7 +76,7 @@ text_section ()
 {
   if (in_section != in_text)
     {
-      fprintf (asm_out_file, "%s\n", TEXT_SECTION_ASM_OP);
+      fprintf (asm_out_file, "%s\015", TEXT_SECTION_ASM_OP);
       in_section = in_text;
     }
 }
@@ -88,7 +88,7 @@ data_section ()
 {
   if (in_section != in_data)
     {
-      fprintf (asm_out_file, "%s\n", DATA_SECTION_ASM_OP);
+      fprintf (asm_out_file, "%s\015", DATA_SECTION_ASM_OP);
       in_section = in_data;
     }
 }
@@ -102,7 +102,7 @@ assemble_asm (string)
 {
   app_enable ();
 
-  fprintf (asm_out_file, "\t%s\n", TREE_STRING_POINTER (string));
+  fprintf (asm_out_file, "\t%s\015", TREE_STRING_POINTER (string));
 }
 
 /* Output assembler code associated with defining the name of a function

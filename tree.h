@@ -87,7 +87,7 @@ enum built_in_function
   BUILT_IN_NEW,
   BUILT_IN_VEC_NEW,
   BUILT_IN_DELETE,
-  BUILT_IN_VEC_DELETE,
+  BUILT_IN_VEC_DELETE
 };
 
 /* The definition of tree nodes fills the next several pages.  */
@@ -156,7 +156,7 @@ struct tree_common
 /* In all nodes that are expressions, this is the data type of the expression.
    In POINTER_TYPE nodes, this is the type that the pointer points to.
    In ARRAY_TYPE nodes, this is the type of the elements.  */
-#define TREE_TYPE(NODE) ((NODE)->common.type)
+#define TREE_TYPE(NODE) (NODE)->common.type
 
 /* Nodes are chained together for many purposes.
    Types are chained together to record them for being output to the debugger
@@ -374,7 +374,7 @@ struct tree_list
 #define CONSTRUCTOR_ELTS(NODE) TREE_OPERAND (NODE, 1)
 
 /* In expression and reference nodes.  */
-#define TREE_OPERAND(NODE, I) ((NODE)->exp.operands[I])
+#define TREE_OPERAND(NODE, I) (NODE)->exp.operands[I]
 #define TREE_COMPLEXITY(NODE, I) ((NODE)->exp.complexity)
 
 struct tree_exp

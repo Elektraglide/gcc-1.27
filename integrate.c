@@ -33,7 +33,7 @@ and this notice must be preserved on all copies.  */
 #include "obstack.h"
 #define	obstack_chunk_alloc	xmalloc
 #define	obstack_chunk_free	free
-extern int xmalloc ();
+extern char * xmalloc ();
 extern void free ();
 
 extern struct obstack permanent_obstack, maybepermanent_obstack;

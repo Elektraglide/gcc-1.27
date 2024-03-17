@@ -464,7 +464,7 @@ final (first, file, write_symbols, optimize)
 		    fprintf (file, ASM_APP_ON);
 		    app_on = 1;
 		  }
-		fprintf (asm_out_file, "\t%s\n", XSTR (body, 0));
+		fprintf (asm_out_file, "\t%s\015", XSTR (body, 0));
 
 		/* There's no telling what that did to the condition codes.  */
 		CC_STATUS_INIT;
@@ -1084,7 +1084,7 @@ output_asm_insn (template, operands)
 	}
     }
 
-  putc ('\n', asm_out_file);
+  putc ('\015', asm_out_file);
 }
 
 /* Output a LABEL_REF, or a bare CODE_LABEL, as an assembler symbol.  */

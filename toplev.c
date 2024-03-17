@@ -405,8 +405,8 @@ report_error_function()
 void
 error (s, v, v2)
      char *s;
-     int v;			/* @@also used as pointer */
-     int v2;			/* @@also used as pointer */
+     char * v;			/* @@also used as pointer */
+     char * v2;			/* @@also used as pointer */
 {
   error_with_file_and_line (input_filename, lineno, s, v, v2);
 }
@@ -419,8 +419,8 @@ error_with_file_and_line (file, line, s, v, v2)
      char *file;
      int line;
      char *s;
-     int v;
-     int v2;
+     char * v;
+     char * v2;
 {
   count_error (0);
 
@@ -565,11 +565,11 @@ botch (s)
 
 /* Same as `malloc' but report error if no memory available.  */
 
-int
+char *
 xmalloc (size)
      unsigned size;
 {
-  register int value = (int) malloc (size);
+  register char * value = (char *) malloc (size);
   if (value == 0)
     fatal ("Virtual memory exhausted.");
   return value;
@@ -577,12 +577,12 @@ xmalloc (size)
 
 /* Same as `realloc' but report error if no memory available.  */
 
-int
+char *
 xrealloc (ptr, size)
      char *ptr;
      int size;
 {
-  int result = realloc (ptr, size);
+  char * result = realloc (ptr, size);
   if (!result)
     fatal ("Virtual memory exhausted.");
   return result;

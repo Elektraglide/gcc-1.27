@@ -346,6 +346,8 @@ static struct binding_level clear_binding_level
 
 /* Create a new `struct binding_level'.  */
 
+extern char *xmalloc();
+
 static
 struct binding_level *
 make_binding_level ()

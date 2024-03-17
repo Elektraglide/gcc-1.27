@@ -146,7 +146,7 @@ _obstack_begin (h, size, alignment, chunkfun, freefun)
      POINTER (*chunkfun) ();
      void (*freefun) ();
 {
-  register struct _obstack_chunk* chunk; /* points to new chunk */
+   struct _obstack_chunk* chunk; /* points to new chunk */
 
   if (alignment == 0)
     alignment = DEFAULT_ALIGNMENT;
@@ -168,8 +168,9 @@ _obstack_begin (h, size, alignment, chunkfun, freefun)
 
   chunk	= h->chunk = (*h->chunkfun) (h->chunk_size);
   h->next_free = h->object_base = chunk->contents;
-  h->chunk_limit = chunk->limit
-   = (char *) chunk + h->chunk_size;
+  h->chunk_limit = (char *) chunk + h->chunk_size;
+  
+  chunk->limit = h->chunk_limit;
   chunk->prev = 0;
 }
 

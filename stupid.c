@@ -228,6 +228,8 @@ stupid_life_analysis (f, nregs, file)
   for (i = FIRST_PSEUDO_REGISTER; i < max_regno; i++)
     reg_order[i] = i;
 
+extern void qsort();
+
   qsort (&reg_order[FIRST_PSEUDO_REGISTER],
 	 max_regno - FIRST_PSEUDO_REGISTER, sizeof (short),
 	 stupid_reg_compare);

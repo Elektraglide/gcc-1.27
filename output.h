@@ -21,4 +21,4 @@ void output_asm_insn();
 
 /* When outputting assembler code, indicates which alternative
    of the constraints was actually satisfied.  */
-int which_alternative;
+extern int which_alternative;
