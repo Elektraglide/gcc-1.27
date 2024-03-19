@@ -135,14 +135,14 @@ output_move_double (operands)
   if (optype0 == PUSHOP && optype1 == POPOP)
     {
       operands[0] = XEXP (XEXP (operands[0], 0), 0);
-      output_asm_insn ("subq%.l %#8,%0", operands);
+      output_asm_insn ("sub%.l %#8,%0", operands);
       operands[0] = gen_rtx (MEM, DImode, operands[0]);
       optype0 = OFFSOP;
     }
   if (optype0 == POPOP && optype1 == PUSHOP)
     {
       operands[1] = XEXP (XEXP (operands[1], 0), 0);
-      output_asm_insn ("subq%.l %#8,%1", operands);
+      output_asm_insn ("sub%.l %#8,%1", operands);
       operands[1] = gen_rtx (MEM, DImode, operands[1]);
       optype1 = OFFSOP;
     }
@@ -211,18 +211,18 @@ output_move_double (operands)
     {
       /* Make any unoffsetable addresses point at high-numbered word.  */
       if (addreg0)
-	output_asm_insn ("addql %#4,%0", &addreg0);
+	output_asm_insn ("add.l %#4,%0", &addreg0);
       if (addreg1)
-	output_asm_insn ("addql %#4,%0", &addreg1);
+	output_asm_insn ("add.l %#4,%0", &addreg1);
 
       /* Do that word.  */
       output_asm_insn (singlemove_string (latehalf), latehalf);
 
       /* Undo the adds we just did.  */
       if (addreg0)
-	output_asm_insn ("subql %#4,%0", &addreg0);
+	output_asm_insn ("sub.l %#4,%0", &addreg0);
       if (addreg1)
-	output_asm_insn ("subql %#4,%0", &addreg1);
+	output_asm_insn ("sub.l %#4,%0", &addreg1);
 
       /* Do low-numbered word.  */
       return singlemove_string (operands);
@@ -234,18 +234,18 @@ output_move_double (operands)
 
   /* Make any unoffsetable addresses point at high-numbered word.  */
   if (addreg0)
-    output_asm_insn ("addql %#4,%0", &addreg0);
+    output_asm_insn ("add.l %#4,%0", &addreg0);
   if (addreg1)
-    output_asm_insn ("addql %#4,%0", &addreg1);
+    output_asm_insn ("add.l %#4,%0", &addreg1);
 
   /* Do that word.  */
   output_asm_insn (singlemove_string (latehalf), latehalf);
 
   /* Undo the adds we just did.  */
   if (addreg0)
-    output_asm_insn ("subql %#4,%0", &addreg0);
+    output_asm_insn ("sub.l %#4,%0", &addreg0);
   if (addreg1)
-    output_asm_insn ("subql %#4,%0", &addreg1);
+    output_asm_insn ("sub.l %#4,%0", &addreg1);
 
   return "";
 }

@@ -11,7 +11,6 @@ from the machine description file `md'.  */
 #include "output.h"
 #include "aux-output.c"
 
-
 char *
 output_0 (operands, insn)
      rtx *operands;
@@ -965,16 +964,16 @@ output_81 (operands, insn)
       if (INTVAL (operands[2]) > 0
 	  && INTVAL (operands[2]) <= 8)
 	return (ADDRESS_REG_P (operands[0])
-		? "addq%.w %2,%0"
-		: "addq%.l %2,%0");
+		? "add%.w %2,%0"
+		: "add%.l %2,%0");
       if (INTVAL (operands[2]) < 0
 	  && INTVAL (operands[2]) >= -8)
         {
 	  operands[2] = gen_rtx (CONST_INT, VOIDmode,
 			         - INTVAL (operands[2]));
 	  return (ADDRESS_REG_P (operands[0])
-		  ? "subq%.w %2,%0"
-		  : "subq%.l %2,%0");
+		  ? "sub%.w %2,%0"
+		  : "sub%.l %2,%0");
 	}
       if (ADDRESS_REG_P (operands[0])
 	  && INTVAL (operands[2]) >= -0x8000
@@ -996,7 +995,7 @@ output_83 (operands, insn)
     {
       if (INTVAL (operands[2]) > 0
 	  && INTVAL (operands[2]) <= 8)
-	return "addq%.w %2,%0";
+	return "add%.w %2,%0";
     }
   if (GET_CODE (operands[2]) == CONST_INT)
     {
@@ -1023,14 +1022,14 @@ output_85 (operands, insn)
     {
       if (INTVAL (operands[2]) > 0
 	  && INTVAL (operands[2]) <= 8)
-	return "addq%.b %2,%0";
+	return "add%.b %2,%0";
     }
   if (GET_CODE (operands[2]) == CONST_INT)
     {
       if (INTVAL (operands[2]) < 0 && INTVAL (operands[2]) >= -8)
        {
 	 operands[2] = gen_rtx (CONST_INT, VOIDmode, - INTVAL (operands[2]));
-	 return "subq%.b %2,%0";
+	 return "sub%.b %2,%0";
        }
     }
   return "add%.b %2,%0";

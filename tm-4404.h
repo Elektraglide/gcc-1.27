@@ -1,7 +1,57 @@
 #define MOTOROLA
 
 
-#include "tm-m68000.h"
+#include "tm-m68k.h"
+
+
+#undef CALL_USED_REGISTERS
+/* AB:  Uniflex seems to clobber d2 */
+/* AB:  Uniflex seems to clobber a2 */
+#define CALL_USED_REGISTERS \
+ {1, 1, 1, 0, 0, 0, 0, 0, \
+  1, 1, 1, 0, 0, 0, 0, 1, \
+  1, 1, 0, 0, 0, 0, 0, 0, \
+  /* FPA registers.  */   \
+  1, 1, 1, 1, 0, 0, 0, 0, \
+  0, 0, 0, 0, 0, 0, 0, 0, \
+  0, 0, 0, 0, 0, 0, 0, 0, \
+  0, 0, 0, 0, 0, 0, 0, 0, }
+
+/* AB: Uniflex asm knows about and uses quick variants, but does not accept them */
+#undef HAVE_addqi3
+#define HAVE_addqi3 (0)
+
+#undef HAVE_subqi3
+#define HAVE_subqi3 (0)
+
+#undef HAVE_andqi3
+#define HAVE_andqi3 (0)
+
+#undef HAVE_iorqi3
+#define HAVE_iorqi3 (0)
+
+#undef HAVE_xorqi3
+#define HAVE_xorqi3 (0)
+
+#undef HAVE_ashlqi3
+#define HAVE_ashlqi3 (0)
+
+#undef HAVE_ashrqi3
+#define HAVE_ashrqi3 (0)
+
+#undef HAVE_lshlqi3
+#define HAVE_lshlqi3 (0)
+
+#undef HAVE_lshrqi3
+#define HAVE_lshrqi3 (0)
+
+#undef HAVE_rotlqi3
+#define HAVE_rotlqi3 (0)
+
+#undef HAVE_rotrqi3
+#define HAVE_rotrqi3 (0)
+
+
 
 /* See tm-m68k.h.  0 means 68000 with no 68881.  */
 
@@ -25,8 +75,12 @@
 #undef TARGET_NEWLINE
 #define TARGET_NEWLINE 015
 
+#undef ASM_OUTPUT_SOURCE_FILENAME
+#define ASM_OUTPUT_SOURCE_FILENAME(FILE, FILENAME) \
+  fprintf (FILE, "\tname %s\015", FILENAME)
+  
 #undef ASM_FILE_START
-#define ASM_FILE_START(FILE) fprintf (FILE, "\tname %s\015\tlib sysdef\015\tlib sysfloat\015",main_input_filename);
+#define ASM_FILE_START(FILE) fprintf (FILE, "\tlib sysdef\015\tlib sysfloat\015");
 
 #undef ASM_APP_ON
 #define ASM_APP_ON ""
@@ -119,7 +173,7 @@
         putc (c, file);					\
       else						\
         {						\
-          fprintf (file, "\\%3.3o", c);			\
+          fprintf (file, "\",$%2.2x,\"", c);			\
           if (i < size - 1 				\
               && p[i + 1] >= '0' && p[i + 1] <= '9')	\
           fprintf (file, "\"\015\tfcc \"");		\
