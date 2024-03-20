@@ -406,7 +406,7 @@ output_33 (operands, insn)
 	       && INTVAL (operands[1]) >= -128)
         {
 #ifdef MOTOROLA
-          return "moveq%.l %1,%0";
+          return "move%.l %1,%0";
 #else
 	  return "moveq %1,%0";
 #endif
@@ -450,7 +450,7 @@ output_34 (operands, insn)
 	       && INTVAL (operands[1]) >= -128)
         {
 #ifdef MOTOROLA
-          return "moveq%.l %1,%0";
+          return "move%.l %1,%0";
 #else
 	  return "moveq %1,%0";
 #endif
